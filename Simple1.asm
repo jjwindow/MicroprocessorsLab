@@ -12,6 +12,8 @@ start
 	movlw	0xFF		    ; Initialise PORTD switches as inputs
 	movwf	TRISD, ACCESS	    ; Port D Setup
 	bsf	PADCFG1,RDPU, ACCESS
+	movlw	0x10
+	movwf	0x30		    ; set FR0x30 to .16
 	movlw 	0x0		    ; clear W
 	bra 	test
 	
@@ -31,12 +33,15 @@ test	movwf	0x06, ACCESS	    ; Test for end of loop condition
 	bra 	loop		    ; Not yet finished goto start of loop again
 	goto 	0x0		    ; Re-run program from start
 
-delay	decfsz	0x20		    ; delay decrement
+delay	decfsz	0x30		    ; delay decrement
 	bra delay
 	return
 longdelay
 	movlw	0x0
-dloop	decf	0x21,f
+dloop	;movlw	0x10
+	;movwf	0x30
+	;call	delay
+	decf	0x21,f
 	subwfb	0x20,f
 	bc dloop
 	return
