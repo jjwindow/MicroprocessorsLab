@@ -7,44 +7,63 @@
 	org 0x100		    ; Main code starts here at address 0x100
 
 start
-	movlw	0x0
-	movwf	TRISC, ACCESS	    ; Port C all outputs
-	movlw	0xFF		    ; Initialise PORTD switches as inputs
-	movwf	TRISD, ACCESS	    ; Port D Setup
-	bsf	PADCFG1,RDPU, ACCESS
-	movlw	0x10
-	movwf	0x30		    ; set FR0x30 to .16
-	movlw 	0x0		    ; clear W
-	bra 	test
-	
-loop	movlw	high(0xFFFF)		    ; delay by 16 instructions
-	movwf	0x20
-	movlw	low(0xFFFF)
-	movwf	0x21
-	;call	delay		    ; Run delay
-	call	longdelay
-	movff 	0x06, PORTC
-	incf 	0x06, W, ACCESS
-	
-test	movwf	0x06, ACCESS	    ; Test for end of loop condition
-	
-	movf	PORTD, W
-	cpfsgt 	0x06, ACCESS	    ; Compare count value to input
-	bra 	loop		    ; Not yet finished goto start of loop again
-	goto 	0x0		    ; Re-run program from start
+	setf	TRISE ; Tri-state PortE
+	banksel PADCFG1 ; PADCFG1 is not in Access Bank!!
+	bsf	PADCFG1, REPU, BANKED ; PortE pull-ups on
+	movlb	0x00 ; set BSR back to Bank 0
+	clrf	TRISD ; clear TRISD
+	movlw	0x2
+	movwf	0x30 ; set FR0x30 to 2
+	movlw 	0x0
+	goto	write_RAM2
 
-delay	decfsz	0x30		    ; delay decrement
-	bra delay
-	return
-longdelay
-	movlw	0x0
-dloop	;movlw	0x10
-	;movwf	0x30
-	;call	delay
-	decf	0x21,f
-	subwfb	0x20,f
-	bc dloop
-	return
+write_RAM1	
+	clrf	TRISE
+	movlw	0x5
+	movwf	LATE
+	movlw	0x1
+	movwf	PORTD
+	call	delay
+	movlw	0x3
+	movwf	PORTD
+	setf	TRISE
+	goto	read_RAM1
 
+write_RAM2	
+	clrf	TRISE
+	movlw	0x6
+	movwf	LATE
+	bcf	PORTD, 0x2
+	movlw	0x6
+	movwf	0x30
+	call	delay
+	bsf	PORTD, 0x2
+	setf	TRISE
+	goto	read_RAM2
+	
+read_RAM1	
+	movlw	0x2 
+	movwf	PORTD
+	movlw	0x3 
+	movwf	PORTD
+	
+read_RAM2	
+	bcf	PORTD, 0x2
+	movlw	0x00
+	call	delaydelay
+	bsf	PORTD, 0x3
+
+delay	movwf	0x30
+dloop	decfsz	0x30		    ; delay decrement
+	bra dloop
+	return
+	
+delaydelay  
+	movwf	0x31
+ddloop	movlw	0x00
+	call	delay
+	decfsz	0x20
+	bra	ddloop
+	return
 	
 	end
