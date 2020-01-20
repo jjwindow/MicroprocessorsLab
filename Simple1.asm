@@ -19,39 +19,36 @@ start
 	goto	write_RAM2
 
 write_RAM1	
-	clrf	TRISE
-	movlw	0x5
+	clrf	TRISE	
+	movlw	0x5	; Test byte
 	movwf	LATE
-	movlw	0x1
-	movwf	PORTE
+	bcf	PORTD, 1 ; turn CP for RAM1 to low
+	movlw	0x6 ; 6 instruction cycle delay, >100ns
 	call	delay
-	movlw	0x3
-	movwf	PORTE
-	setf	TRISE
+	bsf	PORTD, 1    ; turn CP for RAM1 to high
+	setf	TRISE	; reset to all 1s as default
 	goto	read_RAM1
 
 write_RAM2	
 	clrf	TRISE
 	movlw	0x6
 	movwf	LATE
-	bcf	PORTD, 3
-	movlw	0x6
-	movwf	0x30
+	bcf	PORTD, 3                 
+	movlw	0x6 ; same delay as above
 	call	delay
 	bsf	PORTD, 3
 	setf	TRISE
 	goto	read_RAM2
 	
 read_RAM1	
-	movlw	0x2 
-	movwf	PORTD
+	bcf	PORTD, 0
 	movlw	0x3 
-	movwf	PORTD
+	movwf	PORTD, 0
 	
 read_RAM2	
 	bcf	PORTD, 2
 	movlw	0x00
-	;call	delaydelay
+	call	delay
 	bsf	PORTD, 2
 
 delay	movwf	0x30
