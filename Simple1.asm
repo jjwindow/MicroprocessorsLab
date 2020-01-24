@@ -6,8 +6,8 @@
 	
 	org 0x100		    ; Main code starts here at address 0x100
 	
-SPI_MasterInit ; Set Clock edge to positive
-	bsf SSP2STAT, CKE
+SPI_MasterInit ; Set Clock edge to negative
+	bcf SSP2STAT, CKE
 	; MSSP enable; CKP=1; SPI master, clock=Fosc/64 (1MHz)
 	movlw (1<<SSPEN)|(1<<CKP)|(0x02)
 	movwf SSP2CON1
@@ -23,6 +23,11 @@ Wait_Transmit ; Wait for transmission to complete
 	bcf PIR2, SSP2IF ; clear interrupt flag
 	return
 	
+start	call	SPI_MasterInit
+	movlw	0x6
+	call	SPI_MasterTransmit
+	
+	end
 	
 	
 	
@@ -99,4 +104,3 @@ Wait_Transmit ; Wait for transmission to complete
 ;	bra	ddloop
 ;	return
 ;	
-;	end
