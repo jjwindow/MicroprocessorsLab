@@ -32,7 +32,8 @@ Read_Keypad
     movff   result, LATH ;Display Result in PortH
    
     call Decode_Result ;Decode Result (17 valid inputs)
-    
+    lfsr    FSR2, key_pressed
+    nop
     
     return
     
@@ -58,21 +59,21 @@ Read_Column
 Decode_Result
     ; decode the resulting 8 bit string to see if it's a valid input
     test_NULL 
-	movlw   0b11111111 ;code for NO INPUT
+	movlw   0xFF ;code for NO INPUT
 	CPFSEQ  result
 	goto    test_0
 	movlw   0x00
 	movwf   key_pressed
 	return
     test_0   
-	movlw 0b01111101 ;code for 0
+	movlw	0x7D ;code for 0
 	CPFSEQ  result
 	goto    test_1
 	movlw   '0'
 	movwf   key_pressed
 	return
     test_1  
-	movlw   0b11101110 ;code for 1
+	movlw   0xEE ;code for 1
 	CPFSEQ  result
 	goto    test_2
 	movlw   '1'
