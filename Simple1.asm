@@ -26,7 +26,6 @@ setup	bcf	EECON1, CFGS	; point to Flash program memory
 	call	UART_Setup	; setup UART
 	call	LCD_Setup	; setup LCD
 	call	Keypad_Setup ; setup Keypad
-	call	Read_Column
 	goto	start
 	
 	; ******* Main programme ****************************************
