@@ -2,7 +2,7 @@
 
 	extern	UART_Setup, UART_Transmit_Message  ; external UART subroutines
 	extern  LCD_Setup, LCD_Write_Message	    ; external LCD subroutines
-	extern	Keypad_Setup, Read_Row, Read_Column
+	extern	Keypad_Setup, Read_Row, Read_Column, Read_Keypad
 	
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
@@ -38,7 +38,12 @@ start 	lfsr	FSR0, myArray	; Load FSR0 with address in RAM
 	movwf	TBLPTRL		; load low byte to TBLPTRL
 	movlw	myTable_l	; bytes to read
 	movwf 	counter		; our counter register
-loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
+loop 	
+	nop
+	call Read_Keypad
+	goto loop
+	
+	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	movff	TABLAT, POSTINC0; move data from TABLAT to (FSR0), inc FSR0	
 	decfsz	counter		; count down to zero
 	bra	loop		; keep going until finished
