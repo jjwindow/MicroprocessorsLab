@@ -80,98 +80,98 @@ Decode_Result
 	movwf   key_pressed
 	return  
     test_2   
-	movlw   0b11101101 ;code for 2
+	movlw   0xED ;code for 2
 	CPFSEQ  result
 	goto    test_3
 	movlw   '2'
 	movwf   key_pressed
 	return
     test_3  
-	movlw   0b11101011 ;code for 3
+	movlw   0xEB ;code for 3
 	CPFSEQ  result
 	goto    test_4
 	movlw   '3'
 	movwf   key_pressed
 	return
     test_4
-	movlw   0b11011110 ;code for 4
+	movlw   0xDE ;code for 4
 	CPFSEQ  result
 	goto    test_5
 	movlw   '4'
 	movwf   key_pressed
 	return
     test_5
-	movlw   0b11011101 ;code for 5
+	movlw   0xDD ;code for 5
 	CPFSEQ  result
 	goto    test_6
 	movlw   '5'
 	movwf   key_pressed
 	return
     test_6  
-	movlw   0b11011011 ;code for 6
+	movlw   0xDB ;code for 6
 	CPFSEQ  result
 	goto    test_7
 	movlw   '6'
 	movwf   key_pressed
 	return
     test_7  
-	movlw   0b10111110 ;code for 7
+	movlw   0xBE ;code for 7
 	CPFSEQ  result
 	goto    test_8
 	movlw   '7'
 	movwf   key_pressed
 	return
     test_8  
-	movlw   0b10111101 ;code for 8
+	movlw   0xBD ;code for 8
 	CPFSEQ  result
 	goto    test_9
 	movlw   '8'
 	movwf   key_pressed
 	return
     test_9 
-	movlw   0b10111011 ;code for 9
+	movlw   0xBB ;code for 9
 	CPFSEQ  result
 	goto    test_A
 	movlw   '9'
 	movwf   key_pressed
 	return
     test_A 
-	movlw   0b01111110 ;code for A
+	movlw   0x7E ;code for A
 	CPFSEQ  result
 	goto    test_B
 	movlw   'A'
 	movwf   key_pressed
 	return
     test_B
-	movlw   0b01111011 ;code for B
+	movlw   0x7B ;code for B
 	CPFSEQ  result
 	goto    test_C
 	movlw   'B'
 	movwf   key_pressed
 	return
     test_C 
-	movlw   0b01110111 ;code for C
+	movlw   0x77 ;code for C
 	CPFSEQ  result
 	goto    test_D
 	movlw   'C'
 	movwf   key_pressed
 	return
     test_D
-	movlw   0b10110111 ;code for D
+	movlw   0xB7 ;code for D
 	CPFSEQ  result
 	goto    test_E
 	movlw   'D'
 	movwf   key_pressed
 	return
     test_E
-	movlw   0b11010111 ;code for E
+	movlw   0xD7 ;code for E
 	CPFSEQ  result
 	goto    test_F
 	movlw   'E'
 	movwf   key_pressed
 	return
     test_F 
-	movlw   0b11100111 ;code for F
+	movlw   0xE7 ;code for F
 	CPFSEQ  result
 	goto    ReturnError
 	movlw   'F'
