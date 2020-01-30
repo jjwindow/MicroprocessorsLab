@@ -1,6 +1,7 @@
 #include p18f87k22.inc
     
     global  Keypad_Setup, Read_Row, Read_Column, Read_Keypad
+    extern LCD_Write_Message, LCD_clear
 
     org 0x100
 acs0    udata_acs	    ; named variables in access ram
@@ -22,7 +23,8 @@ Keypad_Setup
     movwf delay_count ;set max delay
     return
     
-Read_Keypad
+Read_Keypad 
+    call LCD_clear
     call    Read_Row 
     call    Read_Column
     movlw   0x0 ;clear WREG
@@ -31,10 +33,15 @@ Read_Keypad
     movwf   result ;store result
     movff   result, LATH ;Display Result in PortH
    
-    call Decode_Result ;Decode Result (17 valid inputs)
+    call    Decode_Result ;Decode Result (17 valid inputs)
+    movlw   0x00
+    CPFSEQ  key_pressed
+    goto    Overwrite_LCD_message
+    return
+Overwrite_LCD_message
+    movlw   0x01
     lfsr    FSR2, key_pressed
-    nop
-    
+    call    LCD_Write_Message
     return
     
 Read_Row
