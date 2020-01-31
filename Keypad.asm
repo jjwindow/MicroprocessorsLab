@@ -24,7 +24,6 @@ Keypad_Setup
     return
     
 Read_Keypad 
-    call LCD_clear
     call    Read_Row 
     call    Read_Column
     movlw   0x0 ;clear WREG
@@ -34,11 +33,14 @@ Read_Keypad
     movff   result, LATH ;Display Result in PortH
    
     call    Decode_Result ;Decode Result (17 valid inputs)
+    movff   key_pressed, W
+    movwf   PORTJ
     movlw   0x00
     CPFSEQ  key_pressed
     goto    Overwrite_LCD_message
     return
 Overwrite_LCD_message
+    call LCD_clear
     movlw   0x01
     lfsr    FSR2, key_pressed
     call    LCD_Write_Message

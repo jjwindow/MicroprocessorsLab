@@ -133,33 +133,42 @@ lcdlp1	decf 	LCD_cnt_l,F	; no carry when 0x00 -> 0xff
 	return			; carry reset so return
 	
 LCD_clear
-	clrf	PORTB
-	
-	bsf	PORTB, 5
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	bcf	PORTB, 5
-	bsf	PORTB, 0
-	bsf	PORTB, 5
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	bcf	PORTB, 5
-	clrf	PORTB
+	movlw	b'00000001'	; display clear
+	call	LCD_Send_Byte_I
+	movlw	.2		; wait 2ms
+	call	LCD_delay_ms
+	movlw	b'00000110'	; entry mode incr by 1 no shift
+	call	LCD_Send_Byte_I
+	movlw	.10		; wait 40us
+	call	LCD_delay_x4us
 	return
+	
+;	clrf	PORTB ;set all bits to 0
+;	bsf	PORTB, 5 ;raise E for 
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	bcf	PORTB, 5
+;	bsf	PORTB, 0
+;	bsf	PORTB, 5
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	NOP
+;	bcf	PORTB, 5
+;	clrf	PORTB
+;	return
 	
 
 
