@@ -2,7 +2,7 @@
 
 	extern	UART_Setup, UART_Transmit_Message   ; external UART subroutines
 	extern  LCD_Setup, LCD_Write_Message	    ; external LCD subroutines
-	extern	LCD_Write_Hex			    ; external LCD subroutines
+	extern	LCD_Write_Hex, LCD_clear			    ; external LCD subroutines
 	extern  ADC_Setup, ADC_Read		    ; external ADC routines
 	
 acs0	udata_acs   ; reserve data space in access ram
@@ -58,6 +58,7 @@ measure_loop
 	call	LCD_Write_Hex
 	movf	ADRESL,W
 	call	LCD_Write_Hex
+	call	LCD_clear
 	goto	measure_loop		; goto current line in code
 
 	; a delay subroutine if you need one, times around loop in delay_count
