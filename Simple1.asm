@@ -8,6 +8,8 @@
 acs0	udata_acs   ; reserve data space in access ram
 counter	    res 1   ; reserve one byte for a counter variable
 delay_count res 1   ; reserve one byte for counter in the delay routine
+prevADCH    res 1
+prevADCL    res 1
 
 tables	udata	0x400    ; reserve data anywhere in RAM (here at 0x400)
 myArray res 0x80    ; reserve 128 bytes for message data
@@ -53,14 +55,24 @@ loop 	tblrd*+			; one byte from PM to TABLAT, increment TBLPRT
 	call	UART_Transmit_Message
 	
 measure_loop
+	movff	ADRESH, prevADCH
+	movff	ADRESL, prevADCL
 	call	ADC_Read
 	movf	ADRESH,W
-	call	LCD_Write_Hex
-	movf	ADRESL,W
-	call	LCD_Write_Hex
+	goto	COMPARE
+	cpfseq	prevADCH
+	goto	Overwrite
+	movf	ADRESL, W
+	cpfseq  prevADCL
+	goto	Overwrite
+	goto	measure_loop
+Overwrite
 	call	LCD_clear
+	movf	ADRESH, W
+	call	LCD_Write_Hex
+	movf	ADRESL, W
+	call	LCD_Write_Hex
 	goto	measure_loop		; goto current line in code
-
 	; a delay subroutine if you need one, times around loop in delay_count
 delay	decfsz	delay_count	; decrement until zero
 	bra delay
