@@ -71,3 +71,8 @@ delay_.85
 	call	delay_.4    ; instructions 14 - 20 
 	return
 end
+	
+btfsz	bit ;first bit 0 
+goto	RED
+rotate left
+btfsz
