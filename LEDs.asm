@@ -17,8 +17,10 @@ LEDs	code
 LED_Setup
 	clrf TRISE
 	bcf PORTE, 0  ; READY PIN E0 FOR OUTPUT
-	movlw b'11111111' ;value of 50/255
+	movlw b'11110000' ;value of 50/255
 	movwf BRIGHTNESS
+	movlw	.58	    ; reset byte counter
+	movwf	bytecount
 	return
 
 Output_GRB
@@ -27,16 +29,15 @@ Output_GRB
 	call	delay_50   ; refresh flag
 	bsf	INTCON,GIE ; (*) re-enable interrupts
 	return
-loop	movlw	.9	    ; reset byte counter
+	movlw	.9	    ; reset byte counter
 	movwf	bytecount
-	movlw	.7	    ; reset bit counter
+loop	movlw	.8	    ; reset bit counter
 	movwf	bitcount
 	movff	BRIGHTNESS, _byte    ; +1 // load working byte
 	call	send_byte   ; +2 // send byte
 	decfsz	bytecount   ; decrement byte counter
-	return		    ; if zero bytes left, return above (*)
 	goto loop	    ; otherwise, send next byte
-	
+	return		    ; if zero bytes left, return above (*)
 
 	
 Send_1
@@ -49,6 +50,7 @@ Send_1
 	NOP
 	NOP
 	NOP
+	return
 	
 Send_0
 	; 0.4us HI, 0.85us LO 
@@ -57,7 +59,7 @@ Send_0
 	call	delay_.4		    
 	bcf	PORTE, 0    ; 6 instruction delay -> 7 instruction delay, lo pulse sent
 	call	delay_.85	    ; End hi
-	
+	return
 	
 	
 delay_.4
@@ -88,16 +90,16 @@ delay_50
 iter	decfsz	longdelaycount
 	goto	iter
 	return
+
 send_byte	
 	btfsc	_byte, 7 ; check MSB of working byte
-	goto	no_skip		; if 1 - send 1
+	bra	no_skip		; if 1 - send 1
 	call	Send_0		; if 0 - send 0
-	goto	skip
+	bra	skip
 no_skip	call	Send_1
-skip	rlncf	_byte	; then rotate the working byte (load next bit)
+skip	rlncf	_byte, 1	; then rotate the working byte (load next bit)
 	decfsz	bitcount	; decrement bit counter
 	goto	send_byte	; if bit counter is not zero then loop
-	return			; if bit counter is zero then return (send next byte)
-	
+	return
 
  end
