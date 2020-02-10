@@ -8,7 +8,7 @@ rst	code	0x0000	; reset vector
 main	code
 start	call	LED_Setup		; Sit in infinite loop
 	call	Output_GRB
-	goto	$
+	goto	rst
 	end
 
 
