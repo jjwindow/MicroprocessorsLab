@@ -4,40 +4,43 @@
 
 acs0	udata_acs
 
-BRIGHTNESS	res 1
+BRIGHTNESS	res 3
 bitcount	res 1
 bytecount	res 1
 pixelcount	res 1
 longdelaycount	res 1
-_byte	res 1
+_byte	res 3
 	
 	
 LEDs	code
     
 LED_Setup
-	clrf TRISE
-	bcf PORTE, 0  ; READY PIN E0 FOR OUTPUT
-	movlw b'11110000' ;value of 50/255
-	movwf BRIGHTNESS
-	movlw	.58	    ; reset byte counter
-	movwf	bytecount
-	return
+	clrf	TRISE // +1
+	clrf	PORTE // +1
+	clrf	TRISH // +1
+	clrf	PORTH // +1
+	
+	bcf	PORTE, 0  //+1 ; READY PIN E0 FOR OUTPUT
+	movlw	b'111100000000000011110000' //+ 1 ;value of 50/255
+	movwf	BRIGHTNESS //+1
+	return // + 1
 
 Output_GRB
-	bcf	INTCON,GIE ;disable interrupts
-	call	loop	   ; move to loop 
-	call	delay_50   ; refresh flag
-	bsf	INTCON,GIE ; (*) re-enable interrupts
-	return
-	movlw	.9	    ; reset byte counter
-	movwf	bytecount
-loop	movlw	.8	    ; reset bit counter
-	movwf	bitcount
-	movff	BRIGHTNESS, _byte    ; +1 // load working byte
-	call	send_byte   ; +2 // send byte
-	decfsz	bytecount   ; decrement byte counter
-	goto loop	    ; otherwise, send next byte
-	return		    ; if zero bytes left, return above (*)
+	bcf	INTCON,GIE // +1 ;disable interrupts 
+	movlw	.3	   // +1 ; reset byte counter
+	movwf	bytecount  // +1
+	call	loop	   // +1 ; move to loop 
+	call	delay_rst  // +2 ; refresh flag
+	bsf	INTCON,GIE // +1 ; (*) re-enable interrupts
+	return	    
+loop	movlw	.8	   // +1 ; reset bit counter
+	movwf	bitcount   // +1
+	movff	BRIGHTNESS, _byte // +2 ; load working byte
+	call	send_byte   // + 2 ; send byte
+	decfsz	bytecount   //; decrement byte counter
+	goto loop	    // + 3; otherwise, send next byte
+			    //or
+	return		    // + 2; if zero bytes left, return above (*)
 
 	
 Send_1
@@ -69,8 +72,6 @@ delay_.4
 	NOP
 	return
 	
-delay_.45
-	
 delay_.8
 	call	delay_.4    ; instructions 2-7
 	NOP
@@ -84,12 +85,18 @@ delay_.85
 	call	delay_.4    ; instructions 14 - 20 
 	return
 	
-delay_50
-	movlw	.38
+delay_256
+	movlw	0x00
 	movwf	longdelaycount	
 iter	decfsz	longdelaycount
 	goto	iter
 	return
+	
+delay_rst
+	call	delay_256
+	call	delay_256
+	return
+	
 
 send_byte	
 	btfsc	_byte, 7 ; check MSB of working byte
@@ -98,6 +105,7 @@ send_byte
 	bra	skip
 no_skip	call	Send_1
 skip	rlncf	_byte, 1	; then rotate the working byte (load next bit)
+	;movff	_byte, PORTH
 	decfsz	bitcount	; decrement bit counter
 	goto	send_byte	; if bit counter is not zero then loop
 	return
