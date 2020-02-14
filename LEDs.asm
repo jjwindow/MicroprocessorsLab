@@ -9,38 +9,61 @@ bitcount	res 1
 bytecount	res 1
 pixelcount	res 1
 longdelaycount	res 1
-_byte	res 3
+current_address res 1
+_GREEN		res 1
+_RED		res 1
+_BLUE		res 1
+_byte		res 1
+_PIXELDATA	res 3
 	
 	
 LEDs	code
     
 LED_Setup
-	clrf	TRISE // +1
-	clrf	PORTE // +1
-	clrf	TRISH // +1
-	clrf	PORTH // +1
+	clrf	TRISE ;// +1
+	clrf	PORTE ;// +1
+	clrf	TRISH ;// +1
+	clrf	PORTH ;// +1
+	bcf	PORTE, 0  ;//+1 ; READY PIN E0 FOR OUTPUT
+	call	CLEAR_pixeldata
+	call	Output_GRB
+	call	RESET_pixeldata
+	call	Output_GRB
+	return
 	
-	bcf	PORTE, 0  //+1 ; READY PIN E0 FOR OUTPUT
-	movlw	b'111100000000000011110000' //+ 1 ;value of 50/255
-	movwf	BRIGHTNESS //+1
-	return // + 1
+	
+	
+RESET_pixeldata
+	banksel	_PIXELDATA
+	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+0 ;//+1
+	movlw	b'11111111' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+1 ;//+1
+	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+2 ;//+1
+	return
+	
+CLEAR_pixeldata
+	banksel	_PIXELDATA
+	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+0 ;//+1
+	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+1 ;//+1
+	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movwf	_PIXELDATA+2 ;//+1
+	return 
 
 Output_GRB
-	bcf	INTCON,GIE // +1 ;disable interrupts 
-	movlw	.3	   // +1 ; reset byte counter
-	movwf	bytecount  // +1
-	call	loop	   // +1 ; move to loop 
-	call	delay_rst  // +2 ; refresh flag
-	bsf	INTCON,GIE // +1 ; (*) re-enable interrupts
+	movlw	.15 ;// RESET PIXEL COUNT
+	movwf	pixelcount
+	bcf	INTCON,GIE ;// +1 ;disable interrupts 
+loop1	
+	call	send_pixel ;// +1 ; move to loop - send all data
+	decfsz	pixelcount
+	bra	loop1
+	call	delay_rst  ;// +2 ; refresh flag
+	bsf	INTCON,GIE ;// +1 ; (*) re-enable interrupts
 	return	    
-loop	movlw	.8	   // +1 ; reset bit counter
-	movwf	bitcount   // +1
-	movff	BRIGHTNESS, _byte // +2 ; load working byte
-	call	send_byte   // + 2 ; send byte
-	decfsz	bytecount   //; decrement byte counter
-	goto loop	    // + 3; otherwise, send next byte
-			    //or
-	return		    // + 2; if zero bytes left, return above (*)
 
 	
 Send_1
@@ -65,6 +88,42 @@ Send_0
 	return
 	
 	
+
+send_pixel
+	movlw	.24	   ;// +1 ; reset bit counter
+	movwf	bitcount   ;// +1
+	
+loop2	btfsc	_PIXELDATA+2, 7 ; check MSB of working byte
+	bra	no_skip		; if 1 - send 1
+	call	Send_0		; if 0 - send 0
+	bra	skip
+no_skip	call	Send_1
+skip	; then rotate the working byte (load next bit)
+	bcf	STATUS, C
+	rlcf	_PIXELDATA+0 
+	rlcf	_PIXELDATA+1
+	rlcf	_PIXELDATA+2 
+	decfsz	bitcount	; decrement bit counter
+	goto	loop2	; if bit counter is not zero then loop
+	return   ;// + 2 ; send byte
+
+		
+;send_byte	
+;	btfsc	_byte, 7 ; check MSB of working byte
+;	bra	no_skip		; if 1 - send 1
+;	call	Send_0		; if 0 - send 0
+;	bra	skip
+;no_skip	call	Send_1
+;skip	rlncf	_byte, 1	; then rotate the working byte (load next bit)
+;	;movff	_byte, PORTH
+;	decfsz	bitcount	; decrement bit counter
+;	goto	send_byte	; if bit counter is not zero then loop
+;	return
+
+	
+	
+	
+;//DELAY ROUTINES
 delay_.4
 	NOP		; 6 instruction delay
 	NOP		; req'd delay/time per instruction = 400ns/62.5ns 
@@ -97,17 +156,6 @@ delay_rst
 	call	delay_256
 	return
 	
-
-send_byte	
-	btfsc	_byte, 7 ; check MSB of working byte
-	bra	no_skip		; if 1 - send 1
-	call	Send_0		; if 0 - send 0
-	bra	skip
-no_skip	call	Send_1
-skip	rlncf	_byte, 1	; then rotate the working byte (load next bit)
-	;movff	_byte, PORTH
-	decfsz	bitcount	; decrement bit counter
-	goto	send_byte	; if bit counter is not zero then loop
-	return
-
+	
+;//END
  end
