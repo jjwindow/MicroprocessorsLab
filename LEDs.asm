@@ -25,8 +25,8 @@ LED_Setup
 	clrf	TRISH ;// +1
 	clrf	PORTH ;// +1
 	bcf	PORTE, 0  ;//+1 ; READY PIN E0 FOR OUTPUT
-	call	CLEAR_pixeldata
-	call	Output_GRB
+	;call	CLEAR_pixeldata
+	;call	Output_GRB
 	call	RESET_pixeldata
 	call	Output_GRB
 	return
@@ -35,11 +35,14 @@ LED_Setup
 	
 RESET_pixeldata
 	banksel	_PIXELDATA
-	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	;movff	POSTINC0, _PIXELDATA+0
+	;movff	POSTINC0, _PIXELDATA+1
+	;movff	POSTINC0, _PIXELDATA+2
+	movlw	.60 ;//+ 1 ;value of 50/255
 	movwf	_PIXELDATA+0 ;//+1
-	movlw	b'11111111' ;//+ 1 ;value of 50/255
+	movlw	.220 ;//+ 1 ;value of 50/255
 	movwf	_PIXELDATA+1 ;//+1
-	movlw	b'00000000' ;//+ 1 ;value of 50/255
+	movlw	.20 ;//+ 1 ;value of 50/255
 	movwf	_PIXELDATA+2 ;//+1
 	return
 	
@@ -54,7 +57,7 @@ CLEAR_pixeldata
 	return 
 
 Output_GRB
-	movlw	.15 ;// RESET PIXEL COUNT
+	movlw	.70 ;// RESET PIXEL COUNT
 	movwf	pixelcount
 	bcf	INTCON,GIE ;// +1 ;disable interrupts 
 loop1	
@@ -65,7 +68,8 @@ loop1
 	bsf	INTCON,GIE ;// +1 ; (*) re-enable interrupts
 	return	    
 
-	
+
+
 Send_1
 	; 0.8us HI, 0.45us LO 
 	; 20 instructions TOTAL (after bsf)
@@ -92,8 +96,7 @@ Send_0
 send_pixel
 	movlw	.24	   ;// +1 ; reset bit counter
 	movwf	bitcount   ;// +1
-	
-loop2	btfsc	_PIXELDATA+2, 7 ; check MSB of working byte
+loop2	btfsc	_PIXELDATA+0, 7 ; check MSB of working byte
 	bra	no_skip		; if 1 - send 1
 	call	Send_0		; if 0 - send 0
 	bra	skip
